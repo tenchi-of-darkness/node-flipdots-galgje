@@ -32,11 +32,17 @@ if (!fs.existsSync(outputDir)) {
 	fs.mkdirSync(outputDir, { recursive: true });
 }
 
+registerFont(
+    path.resolve(import.meta.dirname, "../fonts/init-pidmobil-3-led-dotmap.ttf"),
+    { family: "Dotmap" },
+);
+
 // Register fonts
 registerFont(
 	path.resolve(import.meta.dirname, "../fonts/OpenSans-Variable.ttf"),
 	{ family: "OpenSans" },
 );
+
 registerFont(
 	path.resolve(import.meta.dirname, "../fonts/PPNeueMontrealMono-Regular.ttf"),
 	{ family: "PPNeueMontreal" },
@@ -52,12 +58,14 @@ const ctx = canvas.getContext("2d");
 // Disable anti-aliasing and image smoothing
 ctx.imageSmoothingEnabled = false;
 // Set a pixel-perfect monospace font
-ctx.font = "18px monospace";
+ctx.font = "24px monospace";
 // Align text precisely to pixel boundaries
 ctx.textBaseline = "top";
 
 // Initialize the ticker at x frames per second
 const ticker = new Ticker({ fps: FPS });
+
+const gameState = {turnsLeft: 0, maxTurns: 11};
 
 ticker.start(({ deltaTime, elapsedTime }) => {
 	// Clear the console
@@ -72,49 +80,147 @@ ticker.start(({ deltaTime, elapsedTime }) => {
 	ctx.fillStyle = "#000";
 	ctx.fillRect(0, 0, width, height);
 
-	// Draw the elapsed time in seconds (rounded to 2 decimal places)
+	// Display the word
 	{
-		const text = (elapsedTime / 1000).toFixed(2);
+		const text = "D";
 
 		ctx.fillStyle = "#fff";
-		ctx.font = '14px "Px437_ACM_VGA"';
+        ctx.strokeStyle = "#fff";
+		ctx.font = '14px Dotmap';
 
-		const { actualBoundingBoxLeft, actualBoundingBoxAscent } =
+        const sine = Math.sin(elapsedTime / 1000);
+
+		const { actualBoundingBoxAscent, actualBoundingBoxRight, actualBoundingBoxLeft, width: textWidth } =
 			ctx.measureText(text);
-		ctx.fillText(text, actualBoundingBoxLeft, actualBoundingBoxAscent + 1);
-	}
 
-	// Draw the OWOW logo
-	{
-		const text = "OWOW";
+        ctx.fillText(
+            "B",
+            24 + 0*10,
+            4,
+        );
+        ctx.fillText(
+            "O",
+            23 + 1*10,
+            4,
+        );
+        ctx.fillText(
+            "E",
+            24 + 2*10,
+            4,
+        );
+        ctx.fillText(
+            "K",
+            24 + 3*10,
+            4,
+        );
+        ctx.fillText(
+            "E",
+            24 + 4*10,
+            4,
+        );
+        ctx.fillText(
+            "N",
+            23 + 5*10,
+            4,
+        );
 
-		ctx.fillStyle = "#fff";
-		ctx.font = '12px "OpenSans" bold';
+        for (let i = 0; i < 6; i++) {
+            ctx.fillRect(
+                23 + i*10,
+                20,
+                9,
+                1
+            );
+        }
+        const x = 11;
+        const y = 5;
+        const size = 5;
 
-		const { actualBoundingBoxAscent, actualBoundingBoxRight } =
-			ctx.measureText(text);
-		ctx.fillText(
-			text,
-			width - actualBoundingBoxRight,
-			actualBoundingBoxAscent + 1,
-		);
-	}
+        //Pole
 
-	// Example: Draw a moving white dot
-	{
-		const w = width - 9;
-		// Time based sine wave
-		const sine = Math.sin(elapsedTime / 1000);
-		const size = 8; // 5x5 pixels
-		// Map sine wave to x-axis
-		const x = Math.floor(((sine + 1) / 2) * w) - size / 2 + 5;
-		const y = height - size - 1;
-		ctx.fillStyle = "#fff";
+        if(gameState.turnsLeft <= 10)
+            ctx.fillRect(x-8, y-3, 1, 24)
 
-		// Draw the dot (a filled circle)
-		ctx.beginPath();
-		ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-		ctx.fill();
+        //Hanging Stick
+
+        if(gameState.turnsLeft <= 9)
+            ctx.fillRect(x-8, y-3, 15, 1)
+
+        //Support
+
+        if(gameState.turnsLeft <= 8)
+        {
+            ctx.beginPath();
+            ctx.moveTo(x-8, y+5);
+            ctx.lineTo(x, y-3);
+            ctx.stroke();
+        }
+
+        //Base
+
+        if(gameState.turnsLeft <= 7)
+            ctx.fillRect(x-10, y+20, 19, 1)
+
+        //Strop
+
+        if(gameState.turnsLeft <= 6)
+            ctx.fillRect(x+2, y-3, 1, 3)
+
+        //Head
+
+        if(gameState.turnsLeft <= 5)
+        {
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        //Body
+
+        if(gameState.turnsLeft <= 4)
+            ctx.fillRect(x + 2, y + 5, 1, 4)
+
+        //Right Arm
+
+        if(gameState.turnsLeft <= 3)
+        {
+
+            ctx.beginPath();
+            ctx.moveTo(x + 2, y + 5);
+            ctx.lineTo(x + 6, y + 9);
+            ctx.stroke();
+        }
+
+        //Left Arm
+
+        if(gameState.turnsLeft <= 2)
+        {
+
+            ctx.beginPath();
+            ctx.moveTo(x + 3, y + 5);
+            ctx.lineTo(x - 1, y + 9);
+            ctx.stroke();
+        }
+
+        //Left Leg
+
+        if(gameState.turnsLeft <= 1)
+        {
+            ctx.beginPath();
+            ctx.moveTo(x + 3, y + 9);
+            ctx.lineTo(x -1, y + 15);
+            ctx.stroke();
+        }
+
+        //Right Leg
+
+        if(gameState.turnsLeft <= 0)
+        {
+            ctx.beginPath();
+            ctx.moveTo(x + 2, y + 9);
+            ctx.lineTo(x + 6, y + 15);
+            ctx.stroke();
+        }
 	}
 
 	// Convert image to binary (purely black and white) for flipdot display
